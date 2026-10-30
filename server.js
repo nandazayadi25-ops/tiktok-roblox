@@ -1,0 +1,10 @@
+const { WebcastPushConnection } = require('tiktok-live-connector');
+const app = require('express')();
+let events = [];
+const conn = new WebcastPushConnection(process.env.TT_USER);
+conn.connect().catch(console.error);
+conn.on('chat', d => events.push({type:'chat', user:d.uniqueId, text:d.comment}));
+conn.on('gift', d => events.push({type:'gift', user:d.uniqueId, gift:d.giftName, count:d.repeatCount}));
+conn.on('like', d => events.push({type:'like', user:d.uniqueId, count:d.likeCount}));
+app.get('/events', (q, r) => { r.json(events); events = []; });
+app.listen(process.env.PORT || 3000);
